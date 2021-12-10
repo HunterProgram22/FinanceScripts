@@ -1,11 +1,13 @@
 import tabula as tb
 import pandas as pd
 import re
+import os
 
-PATH = "C:\\Users\\Justin Kudela\\Desktop\\"
+DIRECTORY = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks"
+PATH = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks\\"
 
-kat_file = PATH + 'TestCheck2.pdf'
-justin_file = PATH + 'TestCheck.pdf'
+
+
 
 class Paycheck:
     def __init__(self, paycheck_items):
@@ -25,7 +27,6 @@ class Paycheck:
 
 def kat_paycheck(file):
     df = tb.read_pdf(file, area=(0,0 , 612, 792), columns=[150, 210, 288], stream=True, guess=True, pages='1', pandas_options={'header': None})
-
     pay_dict = {
         "gross_pay": clean_data(df[0].loc[14, 2]),
         "federal_tax": clean_data(df[0].loc[18, 2]),
@@ -44,7 +45,6 @@ def kat_paycheck(file):
 
 def justin_paycheck(file):
     df = tb.read_pdf(file, area=(0,0 , 612, 792), columns=[390, 440, 475, 515, 590], stream=True, guess=True, pages='1', pandas_options={'header': None})
-
     pay_dict = {
         "gross_pay": clean_data(df[0].loc[31, 3]),
         "federal_tax": clean_data(df[0].loc[6, 1]),
@@ -67,8 +67,24 @@ def clean_data(string):
     new_string = float(new_string)/100
     return new_string
 
-paycheck_items = kat_paycheck(kat_file)
-test_pay = Paycheck(paycheck_items)
+def sum_gross_pay(paycheck_list):
+    gross_pay = 0.0
+    for index, paycheck in enumerate(paycheck_list):
+        gross_pay += paycheck.gross_pay
+    print(gross_pay)
 
-justin_items = justin_paycheck(justin_file)
-test_pay_2 = Paycheck(justin_items)
+
+paycheck_list = []
+files = os.listdir(DIRECTORY)
+for file in files:
+    print(file[:3])
+    if file[:3] == "Cit":
+        pay_dict = justin_paycheck(PATH + file)
+        paycheck = Paycheck(pay_dict)
+    elif file[:3] == "Pay":
+        pay_dict = kat_paycheck(PATH + file)
+        paycheck = Paycheck(pay_dict)
+    paycheck_list.append(paycheck)
+
+print(paycheck_list)
+sum_gross_pay(paycheck_list)
