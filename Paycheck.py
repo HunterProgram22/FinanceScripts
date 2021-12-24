@@ -74,6 +74,12 @@ def sum_gross_pay(paycheck_list):
     medicare = 0.0
     ohio_tax = 0.0
     city_tax = 0.0
+    short_term_disability = 0.0
+    four_01k = 0.0
+    four_57b = 0.0
+    net_pay = 0.0
+    schwab_deposit = 0.0
+    fifth_third_deposit = 0.0
     for index, paycheck in enumerate(paycheck_list):
         gross_pay += paycheck.gross_pay
         federal_tax += paycheck.federal_tax
@@ -81,12 +87,24 @@ def sum_gross_pay(paycheck_list):
         medicare += paycheck.medicare
         ohio_tax += paycheck.ohio_tax
         city_tax += paycheck.city_tax
+        short_term_disability += paycheck.short_term_disability
+        four_01k += paycheck.four_01k
+        four_57b += paycheck.four_57b
+        net_pay += paycheck.net_pay
+        schwab_deposit += paycheck.schwab_deposit
+        fifth_third_deposit += paycheck.fifth_third_deposit
     print("Gross Pay: " + str(gross_pay))
     print("Federal Tax: " + str(federal_tax))
     print("Social Security: " + str(social_security))
     print("Medicare: " + str(medicare))
     print("Ohio Tax: " + str(ohio_tax))
     print("City Tax: " + str(city_tax))
+    print("Short Term Disability: " + str(short_term_disability))
+    print("401k: " + str(four_01k))
+    print("457b: " + str(four_57b))
+    print("Net Pay: " + str(net_pay))
+    print("Schwab Deposit: " + str(schwab_deposit))
+    print("Fifth Third Deposit: " + str(fifth_third_deposit))
 
 
 paycheck_list = []
