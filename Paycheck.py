@@ -16,7 +16,7 @@ class Paycheck:
         self.social_security = paycheck_items['social_security']
         self.medicare = paycheck_items['medicare']
         self.ohio_tax = paycheck_items['ohio_tax']
-        self.cbus_tax = paycheck_items['city_tax']
+        self.city_tax = paycheck_items['city_tax']
         self.short_term_disability = paycheck_items['short_term_disability']
         self.four_01k = paycheck_items['four_01k']
         self.four_57b = paycheck_items['four_57b']
@@ -69,15 +69,30 @@ def clean_data(string):
 
 def sum_gross_pay(paycheck_list):
     gross_pay = 0.0
+    federal_tax = 0.0
+    social_security = 0.0
+    medicare = 0.0
+    ohio_tax = 0.0
+    city_tax = 0.0
     for index, paycheck in enumerate(paycheck_list):
         gross_pay += paycheck.gross_pay
-    print(gross_pay)
+        federal_tax += paycheck.federal_tax
+        social_security += paycheck.social_security
+        medicare += paycheck.medicare
+        ohio_tax += paycheck.ohio_tax
+        city_tax += paycheck.city_tax
+    print("Gross Pay: " + str(gross_pay))
+    print("Federal Tax: " + str(federal_tax))
+    print("Social Security: " + str(social_security))
+    print("Medicare: " + str(medicare))
+    print("Ohio Tax: " + str(ohio_tax))
+    print("City Tax: " + str(city_tax))
 
 
 paycheck_list = []
 files = os.listdir(DIRECTORY)
 for file in files:
-    print(file[:3])
+    # print(file[:3])
     if file[:3] == "Cit":
         pay_dict = justin_paycheck(PATH + file)
         paycheck = Paycheck(pay_dict)
@@ -86,5 +101,5 @@ for file in files:
         paycheck = Paycheck(pay_dict)
     paycheck_list.append(paycheck)
 
-print(paycheck_list)
+# print(paycheck_list)
 sum_gross_pay(paycheck_list)
