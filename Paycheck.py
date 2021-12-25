@@ -23,6 +23,10 @@ class Paycheck:
         self.net_pay = paycheck_items['net_pay']
         self.schwab_deposit = paycheck_items['schwab_deposit']
         self.fifth_third_deposit = paycheck_items['fifth_third_deposit']
+        try:
+            self.total_health_insurance = paycheck_items['health_insurance'] + paycheck_items['vision_insurance'] + paycheck_items['dental_insurance']
+        except KeyError:
+            self.total_health_insurance = 0.0
 
 
 def kat_paycheck(file):
@@ -47,17 +51,22 @@ def justin_paycheck(file):
     df = tb.read_pdf(file, area=(0,0 , 612, 792), columns=[390, 440, 475, 515, 590], stream=True, guess=True, pages='1', pandas_options={'header': None})
     # print(df)
     for row in range(16):
-        print(df[0].loc[row, 0])
+        # print(df[0].loc[row, 0])
         if df[0].loc[row, 0] == "HEALTH":
-            print("Health is: " + str(df[0].loc[row, 1]))
+            # print("Health is: " + str(df[0].loc[row, 1]))
+            total_health_data = clean_data(df[0].loc[row, 1])
         if df[0].loc[row, 0] == "DENTAL":
-            print("Dental is: " + str(df[0].loc[row, 1]))
+            # print("Dental is: " + str(df[0].loc[row, 1]))
+            total_dental_data = clean_data(df[0].loc[row, 1])
         if df[0].loc[row, 0] == "DEF COMP":
-            print("Def Comp is: " + str(df[0].loc[row, 1]))
+            # print("Def Comp is: " + str(df[0].loc[row, 1]))
+            four_57b_data = clean_data(df[0].loc[row, 1])
+            # print(four_57b_data)
         if df[0].loc[row, 0] == "OPERS":
             print("OPERS is: " + str(df[0].loc[row, 1]))
         if df[0].loc[row, 0] == "VISION":
-            print("Vision is: " + str(df[0].loc[row, 1]))
+            # print("Vision is: " + str(df[0].loc[row, 1]))
+            total_vision_data = clean_data(df[0].loc[row, 1])
 
     pay_dict = {
         "gross_pay": clean_data(df[0].loc[31, 3]),
@@ -68,10 +77,13 @@ def justin_paycheck(file):
         "city_tax": clean_data(df[0].loc[8, 1]),
         "short_term_disability": 0.0,
         "four_01k": 0.0,
-        "four_57b": clean_data(df[0].loc[12, 1]),
+        "four_57b": four_57b_data,
         "net_pay": clean_data(df[0].loc[33, 3]),
         "schwab_deposit": clean_data(df[0].loc[17, 4]),
-        "fifth_third_deposit": clean_data(df[0].loc[18, 4])
+        "fifth_third_deposit": clean_data(df[0].loc[18, 4]),
+        "health_insurance": total_health_data,
+        "vision_insurance": total_vision_data,
+        "dental_insurance": total_dental_data
     }
     return pay_dict
 
@@ -94,6 +106,10 @@ def sum_gross_pay(paycheck_list):
     net_pay = 0.0
     schwab_deposit = 0.0
     fifth_third_deposit = 0.0
+    health_insurance = 0.0
+    dental_insurance = 0.0
+    vision_insurance = 0.0
+    total_insurance = 0.0
     for index, paycheck in enumerate(paycheck_list):
         gross_pay += paycheck.gross_pay
         federal_tax += paycheck.federal_tax
@@ -107,18 +123,20 @@ def sum_gross_pay(paycheck_list):
         net_pay += paycheck.net_pay
         schwab_deposit += paycheck.schwab_deposit
         fifth_third_deposit += paycheck.fifth_third_deposit
-    # print("Gross Pay: " + str(gross_pay))
-    # print("Federal Tax: " + str(federal_tax))
-    # print("Social Security: " + str(social_security))
-    # print("Medicare: " + str(medicare))
-    # print("Ohio Tax: " + str(ohio_tax))
-    # print("City Tax: " + str(city_tax))
-    # print("Short Term Disability: " + str(short_term_disability))
-    # print("401k: " + str(four_01k))
-    # print("457b: " + str(four_57b))
-    # print("Net Pay: " + str(net_pay))
-    # print("Schwab Deposit: " + str(schwab_deposit))
-    # print("Fifth Third Deposit: " + str(fifth_third_deposit))
+        total_insurance += paycheck.total_health_insurance
+    print("Gross Pay: " + str(gross_pay))
+    print("Federal Tax: " + str(federal_tax))
+    print("Social Security: " + str(social_security))
+    print("Medicare: " + str(medicare))
+    print("Ohio Tax: " + str(ohio_tax))
+    print("City Tax: " + str(city_tax))
+    print("Short Term Disability: " + str(short_term_disability))
+    print("401k: " + str(four_01k))
+    print("457b: " + str(four_57b))
+    print("Net Pay: " + str(net_pay))
+    print("Schwab Deposit: " + str(schwab_deposit))
+    print("Fifth Third Deposit: " + str(fifth_third_deposit))
+    print("Total Insurance: " + str(total_insurance))
 
 
 paycheck_list = []
