@@ -2,22 +2,25 @@ import tabula as tb
 import pandas as pd
 import re
 import os
+from loguru import logger
 
 DIRECTORY = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks"
 PATH = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks\\"
 
 
 
-
+@logger.catch
 class Paycheck:
     def __init__(self, paycheck_items):
-        self.gross_pay = paycheck_items['gross_pay']
+        self.justin_gross_pay = paycheck_items['justin_gross_pay']
+        self.kat_gross_pay = paycheck_items['kat_gross_pay']
         self.federal_tax = paycheck_items['federal_tax']
         self.social_security = paycheck_items['social_security']
         self.medicare = paycheck_items['medicare']
         self.ohio_tax = paycheck_items['ohio_tax']
         self.city_tax = paycheck_items['city_tax']
         self.short_term_disability = paycheck_items['short_term_disability']
+        self.opers = paycheck_items['opers']
         self.four_01k = paycheck_items['four_01k']
         self.four_57b = paycheck_items['four_57b']
         self.net_pay = paycheck_items['net_pay']
@@ -29,24 +32,31 @@ class Paycheck:
             self.total_health_insurance = 0.0
 
 
+@logger.catch
 def kat_paycheck(file):
+    """With kat's paycheck the lines vary based on earnings throughout the year - the personal holiday moved all lines down one, so need
+    to figure out a way to address this, same issue probably for Justin."""
     df = tb.read_pdf(file, area=(0,0 , 612, 792), columns=[150, 210, 288], stream=True, guess=True, pages='1', pandas_options={'header': None})
+    # print(df)
     pay_dict = {
-        "gross_pay": clean_data(df[0].loc[14, 2]),
-        "federal_tax": clean_data(df[0].loc[18, 2]),
-        "social_security": clean_data(df[0].loc[19, 2]),
-        "medicare": clean_data(df[0].loc[21, 2]),
-        "ohio_tax": clean_data(df[0].loc[22, 2]),
-        "city_tax": clean_data(df[0].loc[23, 2]),
-        "short_term_disability": clean_data(df[0].loc[26, 2]),
-        "four_01k": clean_data(df[0].loc[27, 2]),
+        "kat_gross_pay": clean_data(df[0].loc[16, 2]),
+        "justin_gross_pay": 0.0,
+        "federal_tax": clean_data(df[0].loc[19, 2]),
+        "social_security": clean_data(df[0].loc[21, 2]),
+        "medicare": clean_data(df[0].loc[22, 2]),
+        "ohio_tax": clean_data(df[0].loc[23, 2]),
+        "city_tax": clean_data(df[0].loc[24, 2]),
+        "short_term_disability": clean_data(df[0].loc[27, 2]),
+        "four_01k": clean_data(df[0].loc[28, 2]),
         "four_57b": 0.0,
-        "net_pay": clean_data(df[0].loc[28, 2]),
-        "schwab_deposit": clean_data(df[0].loc[29, 2]),
-        "fifth_third_deposit": clean_data(df[0].loc[30, 2])
+        "opers": 0.0,
+        "net_pay": clean_data(df[0].loc[29, 2]),
+        "schwab_deposit": clean_data(df[0].loc[30, 2]),
+        "fifth_third_deposit": clean_data(df[0].loc[31, 2])
     }
     return pay_dict
 
+@logger.catch
 def justin_paycheck(file):
     df = tb.read_pdf(file, area=(0,0 , 612, 792), columns=[390, 440, 475, 515, 590], stream=True, guess=True, pages='1', pandas_options={'header': None})
     # print(df)
@@ -64,12 +74,14 @@ def justin_paycheck(file):
             # print(four_57b_data)
         if df[0].loc[row, 0] == "OPERS":
             print("OPERS is: " + str(df[0].loc[row, 1]))
+            opers_data = clean_data(df[0].loc[row, 1])
         if df[0].loc[row, 0] == "VISION":
             # print("Vision is: " + str(df[0].loc[row, 1]))
             total_vision_data = clean_data(df[0].loc[row, 1])
 
     pay_dict = {
-        "gross_pay": clean_data(df[0].loc[31, 3]),
+        "justin_gross_pay": clean_data(df[0].loc[31, 3]),
+        "kat_gross_pay": 0.0,
         "federal_tax": clean_data(df[0].loc[6, 1]),
         "social_security": 0.0,
         "medicare": clean_data(df[0].loc[5, 1]),
@@ -78,6 +90,7 @@ def justin_paycheck(file):
         "short_term_disability": 0.0,
         "four_01k": 0.0,
         "four_57b": four_57b_data,
+        "opers": opers_data,
         "net_pay": clean_data(df[0].loc[33, 3]),
         "schwab_deposit": clean_data(df[0].loc[17, 4]),
         "fifth_third_deposit": clean_data(df[0].loc[18, 4]),
@@ -87,20 +100,24 @@ def justin_paycheck(file):
     }
     return pay_dict
 
+@logger.catch
 def clean_data(string):
     filter_object = filter(str.isdigit, string)
     new_string = "".join(filter_object)
     new_string = float(new_string)/100
     return new_string
 
+@logger.catch
 def sum_gross_pay(paycheck_list):
-    gross_pay = 0.0
+    justin_gross_pay = 0.0
+    kat_gross_pay = 0.0
     federal_tax = 0.0
     social_security = 0.0
     medicare = 0.0
     ohio_tax = 0.0
     city_tax = 0.0
     short_term_disability = 0.0
+    opers = 0.0
     four_01k = 0.0
     four_57b = 0.0
     net_pay = 0.0
@@ -111,26 +128,31 @@ def sum_gross_pay(paycheck_list):
     vision_insurance = 0.0
     total_insurance = 0.0
     for index, paycheck in enumerate(paycheck_list):
-        gross_pay += paycheck.gross_pay
+        justin_gross_pay += paycheck.justin_gross_pay
+        kat_gross_pay += paycheck.kat_gross_pay
+        print("TEST: " + str(paycheck.federal_tax))
         federal_tax += paycheck.federal_tax
         social_security += paycheck.social_security
         medicare += paycheck.medicare
         ohio_tax += paycheck.ohio_tax
         city_tax += paycheck.city_tax
         short_term_disability += paycheck.short_term_disability
+        opers += paycheck.opers
         four_01k += paycheck.four_01k
         four_57b += paycheck.four_57b
         net_pay += paycheck.net_pay
         schwab_deposit += paycheck.schwab_deposit
         fifth_third_deposit += paycheck.fifth_third_deposit
         total_insurance += paycheck.total_health_insurance
-    print("Gross Pay: " + str(gross_pay))
+    print("Justin Gross Pay: " + str(justin_gross_pay))
+    print("Kat Gross Pay: " + str(kat_gross_pay))
     print("Federal Tax: " + str(federal_tax))
     print("Social Security: " + str(social_security))
     print("Medicare: " + str(medicare))
     print("Ohio Tax: " + str(ohio_tax))
     print("City Tax: " + str(city_tax))
     print("Short Term Disability: " + str(short_term_disability))
+    print("OPERS: " + str(opers))
     print("401k: " + str(four_01k))
     print("457b: " + str(four_57b))
     print("Net Pay: " + str(net_pay))
@@ -140,7 +162,8 @@ def sum_gross_pay(paycheck_list):
 
 
 paycheck_list = []
-files = os.listdir(DIRECTORY)
+# The files list below is a list comprehension to make sure the directory isn't added as an object.
+files = [file for file in os.listdir(DIRECTORY) if os.path.isfile(os.path.join(DIRECTORY, file))]
 for file in files:
     # print(file[:3])
     if file[:3] == "Cit":
