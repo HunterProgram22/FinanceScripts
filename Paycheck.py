@@ -4,8 +4,8 @@ import re
 import os
 from loguru import logger
 
-DIRECTORY = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks"
-PATH = "C:\\Users\\Justin Kudela\\Desktop\\Paychecks\\"
+DIRECTORY = r'C:\users\jkudela\appdata\local\programs\python\python310\Finance\FinanceScripts\2022 Paystubs\\'
+PATH = r'C:\users\jkudela\appdata\local\programs\python\python310\Finance\FinanceScripts\2022 Paystubs\\'
 
 
 
@@ -169,11 +169,12 @@ def sum_gross_pay(paycheck_list):
     print(f"HSA Contribution: {hsa_contribution}")
     print(f"FSA Contribution: {fsa_contribution}")
 
-
+total_health_data = 0.0
 paycheck_list = []
 # The files list below is a list comprehension to make sure the directory isn't added as an object.
 files = [file for file in os.listdir(DIRECTORY) if os.path.isfile(os.path.join(DIRECTORY, file))]
 for file in files:
+
     print(file[:3])
     if file[:3] == "Cit":
         pay_dict = justin_paycheck(PATH + file)
@@ -181,26 +182,26 @@ for file in files:
     elif file[:3] == "Pay":
         pay_dict = kat_paycheck(PATH + file)
         paycheck = Paycheck(pay_dict)
-    paycheck_list.append(paycheck)
+    paycheck_list.append(file)
 
 print(paycheck_list)
 sum_gross_pay(paycheck_list)
 
 # if df[0].loc[row, 0] == "HEALTH":
-#     # print("Health is: " + str(df[0].loc[row, 1]))
+#     print("Health is: " + str(df[0].loc[row, 1]))
 #     total_health_data = clean_data(df[0].loc[row, 1])
 # if df[0].loc[row, 0] == "DENTAL":
-#     # print("Dental is: " + str(df[0].loc[row, 1]))
+#     print("Dental is: " + str(df[0].loc[row, 1]))
 #     total_dental_data = clean_data(df[0].loc[row, 1])
 # if df[0].loc[row, 0] == "DEF COMP":
-#     # print("Def Comp is: " + str(df[0].loc[row, 1]))
+#     print("Def Comp is: " + str(df[0].loc[row, 1]))
 #     four_57b_data = clean_data(df[0].loc[row, 1])
-#     # print(four_57b_data)
+#     print(four_57b_data)
 # if df[0].loc[row, 0] == "OPERS":
 #     print("OPERS is: " + str(df[0].loc[row, 1]))
 #     opers_data = clean_data(df[0].loc[row, 1])
 # if df[0].loc[row, 0] == "VISION":
-#     # print("Vision is: " + str(df[0].loc[row, 1]))
+#     print("Vision is: " + str(df[0].loc[row, 1]))
 #     total_vision_data = clean_data(df[0].loc[row, 1])
 # if df[0].loc[row, 0] == "HSA EE":
 #     print("HSA contribution is: " + str(df[0].loc[row, 1]))
