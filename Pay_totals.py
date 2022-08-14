@@ -12,7 +12,6 @@ JUSTIN_COLS = [300, 390, 440, 475, 515, 590]
 
 
 def clean_data(string):
-    print(string)
     try:
         filter_object = filter(str.isdigit, string)
         new_string = "".join(filter_object)
