@@ -1,8 +1,12 @@
+import decimal
+
 from loguru import logger
+from decimal import Decimal
 import tabula.io as tb
 import pandas as pd
 import re
 import os
+
 
 DIRECTORY = r'C:\users\justi\appdata\local\programs\python\python310\FinanceScripts\2022 Paystubs\\'
 PATH = r'C:\users\justi\appdata\local\programs\python\python310\FinanceScripts\2022 Paystubs\\'
@@ -10,39 +14,54 @@ AREA = (0, 0, 612, 792)
 KAT_COLS = [210, 288]
 JUSTIN_COLS = [300, 390, 440, 475, 515, 590]
 
-JUSTIN_TOTAL = 0.0
-KAT_TOTAL = 0.0
-MEDICARE = 0.0
-MEDICARE_KAT = 0.0
-HSA_EE = 0.0
-FLEX_DEP = 0.0
-FIT = 0.0
-FIT_KAT = 0.0
-SIT = 0.0
-SIT_KAT = 0.0
-CITY_TAX = 0.0
-CITY_TAX_KAT = 0.0
-SSN_TAX = 0.0
-STD = 0.0
-OPERS = 0.0
-DEF_COMP = 0.0
-_401k = 0.0
-FIFTH_THIRD_DEPOSIT = 0.0
-SCHWAB_DEPOSIT = 0.0
-FIFTH_THIRD_DEPOSIT_KAT = 0.0
-SCHWAB_DEPOSIT_KAT = 0.0
-HEALTH_INS = 0.0
+JUSTIN_TOTAL = Decimal(0.0)
+KAT_TOTAL = Decimal(0.0)
+MEDICARE = Decimal(0.0)
+MEDICARE_KAT = Decimal(0.0)
+HSA_EE = Decimal(0.0)
+FLEX_DEP = Decimal(0.0)
+FIT = Decimal(0.0)
+FIT_KAT = Decimal(0.0)
+SIT = Decimal(0.0)
+SIT_KAT = Decimal(0.0)
+CITY_TAX = Decimal(0.0)
+CITY_TAX_KAT = Decimal(0.0)
+SSN_TAX = Decimal(0.0)
+STD = Decimal(0.0)
+OPERS = Decimal(0.0)
+DEF_COMP = Decimal(0.0)
+_401k = Decimal(0.0)
+FIFTH_THIRD_DEPOSIT = Decimal(0.0)
+SCHWAB_DEPOSIT = Decimal(0.0)
+FIFTH_THIRD_DEPOSIT_KAT = Decimal(0.0)
+SCHWAB_DEPOSIT_KAT = Decimal(0.0)
+HEALTH_INS = Decimal(0.0)
 
 def clean_data(string):
     try:
-        filter_object = filter(str.isdigit, string)
-        new_string = "".join(filter_object)
-        new_string = float(new_string)/100
-        return new_string
+        logger.debug(string)
+        string = string.strip('$')
+        string = string.strip('-')
+        string = string.replace(' ', '')
+        # string = string.replace(',', '')
+        string = string.strip('*')
+        logger.debug(string)
+        return Decimal(string)
+        # filter_object = filter(str.isdigit, string)
+        # logger.debug(filter_object)
+        # new_string = "".join(filter_object)
+        # logger.debug(new_string)
+        # new_string = Decimal(new_string)
+        # return new_string
+    except decimal.InvalidOperation as e:
+        logger.info(e)
     except TypeError as t:
         logger.info(t)
     except ValueError as v:
         logger.info(v)
+    except AttributeError as a:
+        logger.info(a)
+        return 0.0
     except KeyError:
         return 0.0
 
