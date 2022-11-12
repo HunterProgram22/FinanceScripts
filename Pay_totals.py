@@ -39,31 +39,29 @@ HEALTH_INS = Decimal(0.0)
 
 def clean_data(string):
     try:
-        logger.debug(string)
         string = string.strip('$')
         string = string.strip('-')
-        string = string.replace(' ', '')
-        # string = string.replace(',', '')
+        string = string.replace(' ', '.')
+        string = string.replace(',', '.')
+        if string.count('.') == 2:
+            # print(string)
+            string = string.replace('.', '', 1)
         string = string.strip('*')
-        logger.debug(string)
         return Decimal(string)
-        # filter_object = filter(str.isdigit, string)
-        # logger.debug(filter_object)
-        # new_string = "".join(filter_object)
-        # logger.debug(new_string)
-        # new_string = Decimal(new_string)
-        # return new_string
     except decimal.InvalidOperation as e:
-        logger.info(e)
+        # logger.info(e)
+        return Decimal(0.0)
     except TypeError as t:
-        logger.info(t)
+        # logger.info(t)
+        return Decimal(0.0)
     except ValueError as v:
-        logger.info(v)
+        # logger.info(v)
+        return Decimal(0.0)
     except AttributeError as a:
-        logger.info(a)
-        return 0.0
+        # logger.info(a)
+        return Decimal(0.0)
     except KeyError:
-        return 0.0
+        return Decimal(0.0)
 
 
 def load_pdf_file(file: str, columns: tuple):
@@ -93,11 +91,11 @@ class Justin_Paycheck(Paycheck):
 
 
     def add_data(self):
-        for row in range(5, 21):
+        for row in range(5, 20):
             key = self.pay_data[0].loc[row, 1]
             value = clean_data(self.pay_data[0].loc[row, 2])
             self.pay_data_dict[key] = value
-        for row in range(20, 24):
+        for row in range(20, 23):
             key = self.pay_data[0].loc[row, 1]
             value = clean_data(self.pay_data[0].loc[row, 5])
             self.pay_data_dict[key] = value
@@ -111,7 +109,8 @@ class Kat_Paycheck(Paycheck):
         self.pay_data_dict = {}
 
     def add_data(self):
-        for row in range(18, 31):
+        # logger.info(self.pay_data)
+        for row in range(18, 36):
             key = self.pay_data[0].loc[row, 0]
             value = clean_data(self.pay_data[0].loc[row, 1])
             self.pay_data_dict[key] = value
@@ -120,20 +119,20 @@ class Kat_Paycheck(Paycheck):
 paycheck_list = []
 files = [file for file in os.listdir(DIRECTORY) if os.path.isfile(os.path.join(DIRECTORY, file))]
 for file in files:
-    print(file[:3])
+    # print(file[:3])
     if file[:3] == 'Cit':
         paycheck = Justin_Paycheck(file)
         paycheck.add_data()
-        print(paycheck.pay_data_dict)
+        # print(paycheck.pay_data_dict)
         paycheck_list.append(paycheck)
     if file[:3] == 'Pay':
         paycheck = Kat_Paycheck(file)
         paycheck.add_data()
-        print(paycheck.pay_data_dict)
+        # print(paycheck.pay_data_dict)
         paycheck_list.append(paycheck)
 
 
-print(paycheck_list)
+# print(paycheck_list)
 
 
 # TOTAL FOR JUSTIN PAYCHECKS
@@ -145,15 +144,24 @@ for check in paycheck_list:
         CITY_TAX += check.pay_data_dict['DELAWARE']
         DEF_COMP += check.pay_data_dict['DEF COMP']
         OPERS += check.pay_data_dict['OPERS']
-        HSA_EE += check.pay_data_dict['HSA EE']
+        try:
+            HSA_EE += check.pay_data_dict['HSA EE']
+        except KeyError as b:
+            # logger.info(b)
+            pass
         FLEX_DEP += check.pay_data_dict['FLEX DEP']
         HEALTH_INS += check.pay_data_dict['HEALTH']
         HEALTH_INS += check.pay_data_dict['DENTAL']
         try:
             HEALTH_INS += check.pay_data_dict['VISION']
         except KeyError as e:
-            logger.info(e)
-        FIFTH_THIRD_DEPOSIT += check.pay_data_dict['FIFTH THIRD BANK']
+            # logger.info(e)
+            pass
+        try:
+            FIFTH_THIRD_DEPOSIT += check.pay_data_dict['FIFTH THIRD BANK']
+        except TypeError as er:
+            # logger.info(er)
+            pass
         SCHWAB_DEPOSIT += check.pay_data_dict['JPMORGAN CHASE']
         JUSTIN_TOTAL = (
             MEDICARE +
@@ -177,7 +185,11 @@ for check in paycheck_list:
         STD += check.pay_data_dict['Std Plan Aftx']
         _401k += check.pay_data_dict['401K Pre-Tax']
         FIFTH_THIRD_DEPOSIT_KAT += check.pay_data_dict['Checking 3']
-        SCHWAB_DEPOSIT_KAT += check.pay_data_dict['Checking 1']
+        try:
+            SCHWAB_DEPOSIT_KAT += check.pay_data_dict['Checking 1']
+        except KeyError as e:
+            # logger.info(e)
+            pass
         KAT_TOTAL = (
             MEDICARE_KAT +
             FIT_KAT +
