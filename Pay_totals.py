@@ -1,11 +1,11 @@
 from loguru import logger
-import tabula as tb
+import tabula.io as tb
 import pandas as pd
 import re
 import os
 
-DIRECTORY = r'C:\users\jkudela\appdata\local\programs\python\python310\Finance\FinanceScripts\2022 Paystubs\\'
-PATH = r'C:\users\jkudela\appdata\local\programs\python\python310\Finance\FinanceScripts\2022 Paystubs\\'
+DIRECTORY = r'C:\users\justi\appdata\local\programs\python\python310\FinanceScripts\2022 Paystubs\\'
+PATH = r'C:\users\justi\appdata\local\programs\python\python310\FinanceScripts\2022 Paystubs\\'
 AREA = (0, 0, 612, 792)
 KAT_COLS = [210, 288]
 JUSTIN_COLS = [300, 390, 440, 475, 515, 590]
@@ -13,9 +13,15 @@ JUSTIN_COLS = [300, 390, 440, 475, 515, 590]
 JUSTIN_TOTAL = 0.0
 KAT_TOTAL = 0.0
 MEDICARE = 0.0
+MEDICARE_KAT = 0.0
+HSA_EE = 0.0
+FLEX_DEP = 0.0
 FIT = 0.0
+FIT_KAT = 0.0
 SIT = 0.0
+SIT_KAT = 0.0
 CITY_TAX = 0.0
+CITY_TAX_KAT = 0.0
 SSN_TAX = 0.0
 STD = 0.0
 OPERS = 0.0
@@ -23,6 +29,8 @@ DEF_COMP = 0.0
 _401k = 0.0
 FIFTH_THIRD_DEPOSIT = 0.0
 SCHWAB_DEPOSIT = 0.0
+FIFTH_THIRD_DEPOSIT_KAT = 0.0
+SCHWAB_DEPOSIT_KAT = 0.0
 HEALTH_INS = 0.0
 
 def clean_data(string):
@@ -118,6 +126,8 @@ for check in paycheck_list:
         CITY_TAX += check.pay_data_dict['DELAWARE']
         DEF_COMP += check.pay_data_dict['DEF COMP']
         OPERS += check.pay_data_dict['OPERS']
+        HSA_EE += check.pay_data_dict['HSA EE']
+        FLEX_DEP += check.pay_data_dict['FLEX DEP']
         HEALTH_INS += check.pay_data_dict['HEALTH']
         HEALTH_INS += check.pay_data_dict['DENTAL']
         try:
@@ -126,29 +136,55 @@ for check in paycheck_list:
             logger.info(e)
         FIFTH_THIRD_DEPOSIT += check.pay_data_dict['FIFTH THIRD BANK']
         SCHWAB_DEPOSIT += check.pay_data_dict['JPMORGAN CHASE']
+        JUSTIN_TOTAL = (
+            MEDICARE +
+            FIT +
+            SIT +
+            CITY_TAX +
+            DEF_COMP +
+            OPERS +
+            HSA_EE +
+            FLEX_DEP +
+            HEALTH_INS +
+            FIFTH_THIRD_DEPOSIT +
+            SCHWAB_DEPOSIT
+        )
     if check.id == 'Kat':
-        MEDICARE += check.pay_data_dict['Medicare Tax']
-        FIT += check.pay_data_dict['Federal Income Tax']
-        SIT += check.pay_data_dict['OH State Income Tax']
-        CITY_TAX += check.pay_data_dict['Columbus Income Tax']
+        MEDICARE_KAT += check.pay_data_dict['Medicare Tax']
+        FIT_KAT += check.pay_data_dict['Federal Income Tax']
+        SIT_KAT += check.pay_data_dict['OH State Income Tax']
+        CITY_TAX_KAT += check.pay_data_dict['Columbus Income Tax']
         SSN_TAX += check.pay_data_dict['Social Security Tax']
         STD += check.pay_data_dict['Std Plan Aftx']
         _401k += check.pay_data_dict['401K Pre-Tax']
-        FIFTH_THIRD_DEPOSIT += check.pay_data_dict['Checking 3']
-        SCHWAB_DEPOSIT += check.pay_data_dict['Checking 1']
+        FIFTH_THIRD_DEPOSIT_KAT += check.pay_data_dict['Checking 3']
+        SCHWAB_DEPOSIT_KAT += check.pay_data_dict['Checking 1']
+        KAT_TOTAL = (
+            MEDICARE_KAT +
+            FIT_KAT +
+            SIT_KAT +
+            CITY_TAX_KAT +
+            SSN_TAX +
+            STD +
+            _401k +
+            FIFTH_THIRD_DEPOSIT_KAT +
+            SCHWAB_DEPOSIT_KAT
+        )
 
 
 print(f'Justin Pay total = {JUSTIN_TOTAL}')
 print(f'Kat Pay total = {KAT_TOTAL}')
-print(f'Fifth Third Deposit total = {FIFTH_THIRD_DEPOSIT}')
-print(f'Schwab Deposit total = {SCHWAB_DEPOSIT}')
+print(f'Fifth Third Deposit total = {FIFTH_THIRD_DEPOSIT + FIFTH_THIRD_DEPOSIT_KAT}')
+print(f'Schwab Deposit total = {SCHWAB_DEPOSIT + SCHWAB_DEPOSIT_KAT}')
+print(f'HSA Deposit total = {HSA_EE}')
+print(f'Flex Spending Deposit total = {FLEX_DEP}')
 print(f'OPERS total = {OPERS}')
 print(f'457b total = {DEF_COMP}')
 print(f'401k total = {_401k}')
-print(f'Medicare total = {MEDICARE}')
-print(f'Fed Tax total = {FIT}')
-print(f'State Tax total = {SIT}')
-print(f'City Tax total = {CITY_TAX}')
+print(f'Medicare total = {MEDICARE + MEDICARE_KAT}')
+print(f'Fed Tax total = {FIT + FIT_KAT}')
+print(f'State Tax total = {SIT + SIT_KAT}')
+print(f'City Tax total = {CITY_TAX + CITY_TAX_KAT}')
 print(f'Social Security Tax total = {SSN_TAX}')
 print(f'Short Term Disability total = {STD}')
 print(f'Health Insurance total = {HEALTH_INS}')
